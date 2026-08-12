@@ -8,7 +8,7 @@ export const uploadResume = async (req, res) => {
       return res.status(400).json({ message: "No file uploaded" });
     }
 
-    const rawText = await extractTextFromFile(req.file.path);
+    const rawText = await extractTextFromFile(req.file.buffer, req.file.originalname);
 
     if (!rawText || rawText.length < 30) {
       return res.status(400).json({ message: "Could not extract meaningful text from file" });
@@ -19,7 +19,6 @@ export const uploadResume = async (req, res) => {
     const resume = await Resume.create({
       user: req.userId,
       fileName: req.file.originalname,
-      filePath: req.file.path,
       rawText,
       parsedData,
     });

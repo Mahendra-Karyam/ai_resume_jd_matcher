@@ -1,16 +1,15 @@
-import fs from "fs"; //Node's file system module, used to read the file from disk.
-import path from "path"; //path – helps extract the file extension (like .pdf or .docx) from the file path.
-import pdfParse from "pdf-parse"; //pdfParse – a library that reads PDF files and pulls the text out.
-import mammoth from "mammoth"; //mammoth – a library that reads Word documents (.docx) and pulls the text out.
+import path from "path"; // path – helps extract the file extension (like .pdf or .docx) from the filename
+import pdfParse from "pdf-parse"; // pdfParse – a library that reads PDF files and pulls the text out.
+import mammoth from "mammoth"; // mammoth – a library that reads Word documents (.docx) and pulls the text out.
 
 /**
- * Extracts raw text from a PDF or DOCX file on disk.
- * @param {string} filePath - absolute path to the uploaded file
+ * Extracts raw text from a PDF or DOCX file buffer.
+ * @param {Buffer} buffer - the uploaded file's in-memory buffer
+ * @param {string} originalName - original filename, used to detect the extension
  * @returns {Promise<string>} extracted plain text
  */
-export const extractTextFromFile = async (filePath) => {
-  const ext = path.extname(filePath).toLowerCase();
-  const buffer = fs.readFileSync(filePath);
+export const extractTextFromFile = async (buffer, originalName) => {
+  const ext = path.extname(originalName).toLowerCase();
 
   if (ext === ".pdf") {
     const data = await pdfParse(buffer);
