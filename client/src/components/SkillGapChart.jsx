@@ -8,7 +8,10 @@ export default function SkillGapChart({ matchedSkills = [], missingSkills = [] }
         <div className="flex flex-wrap gap-1.5">
           {matchedSkills.length === 0 && <span className="text-xs text-gray-400">None found</span>}
           {matchedSkills.map((skill, i) => (
-            <span key={i} className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
+            <span
+              key={i}
+              className="text-xs leading-snug bg-green-100 text-green-800 px-2.5 py-1.5 rounded-lg max-w-full"
+            >
               {skill}
             </span>
           ))}
@@ -19,7 +22,10 @@ export default function SkillGapChart({ matchedSkills = [], missingSkills = [] }
         <div className="flex flex-wrap gap-1.5">
           {missingSkills.length === 0 && <span className="text-xs text-gray-400">None — great fit!</span>}
           {missingSkills.map((skill, i) => (
-            <span key={i} className="text-xs bg-red-100 text-red-800 px-2 py-1 rounded-full">
+            <span
+              key={i}
+              className="text-xs leading-snug bg-red-100 text-red-800 px-2.5 py-1.5 rounded-lg max-w-full"
+            >
               {skill}
             </span>
           ))}
