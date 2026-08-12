@@ -1,7 +1,7 @@
-import fs from "fs";
-import path from "path";
-import pdfParse from "pdf-parse";
-import mammoth from "mammoth";
+import fs from "fs"; //Node's file system module, used to read the file from disk.
+import path from "path"; //path – helps extract the file extension (like .pdf or .docx) from the file path.
+import pdfParse from "pdf-parse"; //pdfParse – a library that reads PDF files and pulls the text out.
+import mammoth from "mammoth"; //mammoth – a library that reads Word documents (.docx) and pulls the text out.
 
 /**
  * Extracts raw text from a PDF or DOCX file on disk.

@@ -66,7 +66,7 @@ export default function Dashboard() {
 
   const handleMatch = async () => {
     if (!selectedResume || !selectedJob) {
-      setError("Select both a resume and a job description first.");
+      setError("Please provide both a resume and a job description to continue.");
       return;
     }
     setError("");
@@ -246,3 +246,4 @@ export default function Dashboard() {
     </div>
   );
 }
+
