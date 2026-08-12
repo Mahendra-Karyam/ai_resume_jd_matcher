@@ -38,14 +38,14 @@ cd server
 cp .env.example .env
 # Fill in MONGO_URI, JWT_SECRET, GEMINI_API_KEY in .env
 npm install
-npm run dev        # starts on http://localhost:5000
+npm run dev        # starts on https://ai-resume-jd-matcher-uftn.onrender.com
 ```
 
 ### 2. Frontend
 ```bash
 cd client
 npm install
-npm run dev         # starts on http://localhost:5173 (proxies /api to :5000)
+npm run dev         # starts on https://ai-resume-jd-matcher-1-pvtg.onrender.com/
 ```
 
 ### 3. MongoDB
