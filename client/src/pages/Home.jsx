@@ -6,8 +6,8 @@ export default function Home() {
   const { user } = useAuth();
   return (
     <div className="max-w-3xl mx-auto text-center py-12 sm:py-20 px-4">
-      <h1 className="text-2xl sm:text-4xl font-bold text-gray-900 mb-3 sm:mb-4 leading-snug sm:leading-tight">
-        Match your resume to any job — instantly.
+      <h1 className="text-xl sm:text-4xl font-bold text-gray-900 mb-3 sm:mb-4 leading-snug sm:leading-tight">
+        Match your resume<br className="sm:hidden" /> to any job — instantly.
       </h1>
       <p className="text-gray-500 text-sm sm:text-lg mb-6 sm:mb-8 leading-relaxed">
         Upload your resume, paste a job description, and get an AI-powered match score,
