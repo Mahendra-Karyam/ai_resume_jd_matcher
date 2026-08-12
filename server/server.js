@@ -1,5 +1,4 @@
-import "dotenv/config"; // MUST be the very first import — loads .env before any other
-                         // module (like aiClient.js) reads process.env at import time
+import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import connectDB from "./config/db.js";
