@@ -45,7 +45,7 @@ npm run dev        # starts on https://ai-resume-jd-matcher-uftn.onrender.com
 ```bash
 cd client
 npm install
-npm run dev         # starts on https://ai-resume-jd-matcher-1-pvtg.onrender.com/
+npm run dev         # starts on https://ai-resume-jd-matcher-1-pvtg.onrender.com
 ```
 
 ### 3. MongoDB
