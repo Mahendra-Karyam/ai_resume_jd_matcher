@@ -5,7 +5,7 @@ import { useAuth } from "../context/AuthContext.jsx";
 export default function Home() {
   const { user } = useAuth();
   return (
-    <div className="min-h-[calc(100dvh-4rem)] flex items-center justify-center px-6 sm:px-4">
+    <div className="px-6 sm:px-4 py-16 sm:py-24">
       <div className="max-w-3xl mx-auto text-center">
         <h1 className="text-xl sm:text-4xl font-bold text-gray-900 mb-3 sm:mb-4 leading-snug sm:leading-tight">
           Match your resume<br className="sm:hidden" />{" "}
