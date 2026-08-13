@@ -1,4 +1,5 @@
-import "dotenv/config";
+import "dotenv/config"; // MUST be the very first import — loads .env before any other
+                         // module (like aiClient.js) reads process.env at import time
 import express from "express";
 import cors from "cors";
 import connectDB from "./config/db.js";
@@ -7,6 +8,7 @@ import authRoutes from "./routes/authRoutes.js";
 import resumeRoutes from "./routes/resumeRoutes.js";
 import jobRoutes from "./routes/jobRoutes.js";
 import matchRoutes from "./routes/matchRoutes.js";
+import assistantRoutes from "./routes/assistantRoutes.js";
 
 connectDB();
 
@@ -29,6 +31,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/resumes", resumeRoutes);
 app.use("/api/jobs", jobRoutes);
 app.use("/api/matches", matchRoutes);
+app.use("/api/assistant", assistantRoutes);
 
 // Global error handler
 app.use((err, req, res, next) => {

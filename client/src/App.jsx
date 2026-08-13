@@ -7,6 +7,7 @@ import Register from "./pages/Register.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
 import MatchResult from "./pages/MatchResult.jsx";
 import MatchHistory from "./pages/MatchHistory.jsx";
+import HelpChatWidget from "./components/HelpChatWidget.jsx";
 import { useAuth } from "./context/AuthContext.jsx";
 
 function PrivateRoute({ children }) {
@@ -48,6 +49,7 @@ export default function App() {
           }
         />
       </Routes>
+      <HelpChatWidget />
     </>
   );
 }
