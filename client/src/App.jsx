@@ -20,6 +20,7 @@ export default function App() {
   return (
     <>
       <Navbar />
+      <HelpChatWidget />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
