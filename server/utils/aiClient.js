@@ -111,13 +111,17 @@ ${jobText.slice(0, 8000)}`;
 /**
  * Powers the in-app help chat widget. Takes the new user message plus recent
  * conversation history (for context across turns) and replies in plain text,
- * grounded in HELP_KNOWLEDGE_BASE (see server/data/helpKnowledgeBase.js).
+ * grounded in HELP_KNOWLEDGE_BASE (see server/data/helpKnowledgeBase.js) plus
+ * an optional block of live, per-request context (current page, current
+ * user's own saved data) appended after it — same idea as the Library
+ * Management System project's buildSystemPrompt.
  *
  * @param {Array<{role: "user"|"assistant", text: string}>} history - prior turns, oldest first
  * @param {string} userMessage - the new question from the user
+ * @param {string} [liveContext] - optional extra system-prompt text (current page, current user's data)
  * @returns {Promise<string>} the assistant's plain-text reply
  */
-export const answerHelpQuestion = async (history, userMessage) => {
+export const answerHelpQuestion = async (history, userMessage, liveContext = "") => {
   // Gemini's chat format uses role "model" instead of "assistant" for its own turns.
   const contents = [
     ...history.map((turn) => ({
@@ -127,11 +131,15 @@ export const answerHelpQuestion = async (history, userMessage) => {
     { role: "user", parts: [{ text: userMessage }] },
   ];
 
+  const systemInstruction = liveContext
+    ? `${HELP_KNOWLEDGE_BASE}\n\n${liveContext}`
+    : HELP_KNOWLEDGE_BASE;
+
   const response = await ai.models.generateContent({
     model: MODEL_NAME,
     contents,
     config: {
-      systemInstruction: HELP_KNOWLEDGE_BASE,
+      systemInstruction,
       // Plain conversational text here, not JSON — this is a chat reply, not structured data.
     },
   });

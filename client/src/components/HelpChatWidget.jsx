@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { useLocation } from "react-router-dom";
 import api from "../api/axios.js";
 
 const WELCOME_MESSAGE = {
@@ -21,6 +22,7 @@ const renderFormattedText = (text) => {
 };
 
 export default function HelpChatWidget() {
+  const location = useLocation();
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState([WELCOME_MESSAGE]);
   const [input, setInput] = useState("");
@@ -54,6 +56,7 @@ export default function HelpChatWidget() {
       const { data } = await api.post("/assistant/chat", {
         message: trimmed,
         history,
+        currentPage: location.pathname,
       });
 
       setMessages((prev) => [...prev, { role: "assistant", text: data.reply }]);
