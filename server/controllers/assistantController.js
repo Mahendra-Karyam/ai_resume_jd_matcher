@@ -88,6 +88,7 @@ async function buildUserContext(requester) {
       Match.find({ user: requester.userId }, "matchScore createdAt")
         .sort({ createdAt: -1 })
         .limit(MAX_MATCHES_IN_CONTEXT)
+        .populate("job", "title")
         .lean(),
     ]);
 
@@ -115,7 +116,15 @@ async function buildUserContext(requester) {
       const avgScore = Math.round(
         matches.reduce((sum, m) => sum + (m.matchScore || 0), 0) / matches.length
       );
-      lines.push(`They have run ${matches.length} match${matches.length === 1 ? "" : "es"} so far, averaging a ${avgScore}% match score.`);
+      // Listed most-recent-first (matches query above is sorted that way) so
+      // the model can answer "what was my LAST/most recent match score"
+      // directly instead of only having an average to work with.
+      const matchRows = matches
+        .map((m, i) => `  ${i === 0 ? "(most recent) " : ""}- ${m.matchScore}%${m.job?.title ? ` for "${m.job.title}"` : ""}`)
+        .join("\n");
+      lines.push(
+        `They have run ${matches.length} match${matches.length === 1 ? "" : "es"} so far (most recent first), averaging ${avgScore}%:\n${matchRows}`
+      );
     } else {
       lines.push("They haven't run any matches yet.");
     }
@@ -139,7 +148,7 @@ ${userContext}
 They are currently viewing: ${pageDescription}.
 
 Guidelines for the live context above:
-- You know the current visitor's own saved resumes, job descriptions, and match history (if logged in) — use that to answer things like "what resumes do I have" or "what was my last match score" personally and directly. Never reveal or guess at any OTHER user's data.
+- You know the current visitor's own saved resumes, job descriptions, and match history (if logged in) — use that to answer things like "what resumes do I have" or "what was my last match score" personally and directly, using the actual most-recent score listed, not the average, when asked about their "last"/"latest"/"most recent" match. Never reveal or guess at any OTHER user's data.
 - Use the "currently viewing" info to tailor guidance — e.g. if they're on the Dashboard and ask "how do I get started", point them to the upload area right there rather than generic instructions. If asked what page they're on, answer directly using this info.`;
 }
 
