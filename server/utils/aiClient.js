@@ -5,7 +5,18 @@ import { HELP_KNOWLEDGE_BASE } from "../data/helpKnowledgeBase.js";
 // keys and the newer "AQ." Auth keys that Google now issues by default.
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
-const MODEL_NAME = "gemini-3.6-flash";
+// Overridable via GEMINI_MODEL so this can be bumped without a code change.
+const MODEL_NAME = process.env.GEMINI_MODEL || "gemini-3.6-flash";
+
+// Free-tier Gemini keys have a small daily request quota PER MODEL (this app
+// hit real 429 RESOURCE_EXHAUSTED errors from this in practice — see the
+// Library Management System project, which had the same issue). Different
+// models draw from separate quota buckets, so if the primary model's quota
+// is used up, a different model can still work for the rest of the day.
+// Overridable via GEMINI_FALLBACK_MODEL — set this to any Gemini model your
+// API key has access to that you're not already using elsewhere, so its
+// quota is untouched when the primary model runs out.
+const FALLBACK_MODEL_NAME = process.env.GEMINI_FALLBACK_MODEL || "gemini-3.5-flash-lite";
 
 /**
  * Strips markdown code fences just in case (safety net — responseMimeType usually
@@ -13,6 +24,30 @@ const MODEL_NAME = "gemini-3.6-flash";
  */
 const cleanJson = (text) => {
   return text.replace(/```json/gi, "").replace(/```/g, "").trim();
+};
+
+/**
+ * Calls Gemini's generateContent with MODEL_NAME first. If that call fails
+ * for any reason (most notably a 429 once the free tier's daily quota for
+ * that model is used up), it automatically retries once with
+ * FALLBACK_MODEL_NAME before giving up. Used by every AI call in this file
+ * (resume parsing, job parsing, matching, and the help chat widget) so a
+ * quota outage on the primary model doesn't take down all four features at
+ * once.
+ *
+ * @param {object} params - everything generateContent needs EXCEPT `model` (i.e. `contents` and `config`)
+ */
+const generateWithFallback = async (params) => {
+  try {
+    return await ai.models.generateContent({ model: MODEL_NAME, ...params });
+  } catch (primaryError) {
+    console.error(
+      `Primary model "${MODEL_NAME}" failed (${primaryError.status || "no status"}), trying fallback model "${FALLBACK_MODEL_NAME}"...`
+    );
+    // Let the fallback attempt's own error (if it also fails) propagate up
+    // to the caller's catch block as before.
+    return await ai.models.generateContent({ model: FALLBACK_MODEL_NAME, ...params });
+  }
 };
 
 /**
@@ -33,8 +68,7 @@ Normalize skill names (e.g. "ReactJS" -> "React", "JS" -> "JavaScript"). Include
 RESUME TEXT:
 ${resumeText.slice(0, 15000)}`;
 
-  const response = await ai.models.generateContent({
-    model: MODEL_NAME,
+  const response = await generateWithFallback({
     contents: prompt,
     config: { responseMimeType: "application/json" },
   });
@@ -58,8 +92,7 @@ Normalize skill names consistently (e.g. "ReactJS" -> "React").
 JOB DESCRIPTION:
 ${jobText.slice(0, 15000)}`;
 
-  const response = await ai.models.generateContent({
-    model: MODEL_NAME,
+  const response = await generateWithFallback({
     contents: prompt,
     config: { responseMimeType: "application/json" },
   });
@@ -99,8 +132,7 @@ ${resumeText.slice(0, 12000)}
 JOB DESCRIPTION:
 ${jobText.slice(0, 8000)}`;
 
-  const response = await ai.models.generateContent({
-    model: MODEL_NAME,
+  const response = await generateWithFallback({
     contents: prompt,
     config: { responseMimeType: "application/json" },
   });
@@ -135,8 +167,7 @@ export const answerHelpQuestion = async (history, userMessage, liveContext = "")
     ? `${HELP_KNOWLEDGE_BASE}\n\n${liveContext}`
     : HELP_KNOWLEDGE_BASE;
 
-  const response = await ai.models.generateContent({
-    model: MODEL_NAME,
+  const response = await generateWithFallback({
     contents,
     config: {
       systemInstruction,
