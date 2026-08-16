@@ -7,17 +7,50 @@ const WELCOME_MESSAGE = {
   text: "Hi! I can help explain how ResumeMatcher works — uploading resumes, running matches, understanding your score, and more. What would you like to know?",
 };
 
-// Gemini replies in light Markdown (mainly **bold**). Rather than pulling in a
-// full markdown library or using dangerouslySetInnerHTML (risky with AI text),
-// this splits on **bold** markers and renders them as real <strong> elements,
-// leaving everything else as plain text.
-const renderFormattedText = (text) => {
-  const parts = text.split(/(\*\*[^*]+\*\*)/g);
+// Shown as quick-tap chips before the user has asked anything, same idea as
+// the Library Management System project's STARTER_QUESTIONS — just swapped
+// for questions relevant to this app instead of books.
+const STARTER_QUESTIONS = [
+  "How do I upload my resume?",
+  "How do I run a match?",
+  "What does my match score mean?",
+  "Where can I see my past matches?",
+];
+
+// Gemini replies in light Markdown (mainly **bold**, *italic*, and "* "
+// bullet lines). Rather than pulling in a full markdown library or using
+// dangerouslySetInnerHTML (risky with AI text), this processes the reply
+// line by line: a line starting with "* " becomes a real bullet point
+// (dot + text, not a literal asterisk); within any line, **bold** becomes
+// <strong> and single *italic* becomes <em> (checked in that order, since
+// ** must be matched before a lone * is considered). Numbered lines
+// ("1. ", "2. ") and plain lines are left as-is, just with bold/italic applied.
+const renderInline = (line, lineKey) => {
+  const parts = line.split(/(\*\*[^*]+\*\*|\*[^*]+\*)/g);
   return parts.map((part, i) => {
-    if (part.startsWith("**") && part.endsWith("**")) {
-      return <strong key={i}>{part.slice(2, -2)}</strong>;
+    if (part.startsWith("**") && part.endsWith("**") && part.length > 3) {
+      return <strong key={`${lineKey}-${i}`}>{part.slice(2, -2)}</strong>;
     }
-    return <React.Fragment key={i}>{part}</React.Fragment>;
+    if (part.startsWith("*") && part.endsWith("*") && part.length > 1) {
+      return <em key={`${lineKey}-${i}`}>{part.slice(1, -1)}</em>;
+    }
+    return <React.Fragment key={`${lineKey}-${i}`}>{part}</React.Fragment>;
+  });
+};
+
+const renderFormattedText = (text) => {
+  const lines = text.split("\n");
+  return lines.map((line, i) => {
+    const bulletMatch = line.match(/^\s*\*\s+(.*)$/);
+    if (bulletMatch) {
+      return (
+        <div key={i} className="flex gap-1.5 pl-0.5">
+          <span aria-hidden="true">•</span>
+          <span>{renderInline(bulletMatch[1], i)}</span>
+        </div>
+      );
+    }
+    return <div key={i}>{renderInline(line, i)}</div>;
   });
 };
 
@@ -36,9 +69,8 @@ export default function HelpChatWidget() {
     }
   }, [messages, open]);
 
-  const handleSend = async (e) => {
-    e.preventDefault();
-    const trimmed = input.trim();
+  const sendMessage = async (textOverride) => {
+    const trimmed = (textOverride ?? input).trim();
     if (!trimmed || sending) return;
 
     const userMessage = { role: "user", text: trimmed };
@@ -66,6 +98,11 @@ export default function HelpChatWidget() {
     } finally {
       setSending(false);
     }
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    sendMessage();
   };
 
   return (
@@ -124,11 +161,26 @@ export default function HelpChatWidget() {
                 </div>
               </div>
             )}
+
+            {/* Quick question chips — only show before the user has asked anything */}
+            {messages.length === 1 && (
+              <div className="flex flex-wrap gap-2 pt-1">
+                {STARTER_QUESTIONS.map((q) => (
+                  <button
+                    key={q}
+                    onClick={() => sendMessage(q)}
+                    className="text-xs border border-gray-300 text-gray-600 rounded-full px-3 py-1 hover:bg-brand-600 hover:text-white hover:border-brand-600 transition cursor-pointer"
+                  >
+                    {q}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {error && <p className="px-3 pt-1 text-xs text-red-500 shrink-0">{error}</p>}
 
-          <form onSubmit={handleSend} className="p-2.5 border-t border-gray-200 flex items-center gap-2 shrink-0">
+          <form onSubmit={handleSubmit} className="p-2.5 border-t border-gray-200 flex items-center gap-2 shrink-0">
             <input
               type="text"
               value={input}

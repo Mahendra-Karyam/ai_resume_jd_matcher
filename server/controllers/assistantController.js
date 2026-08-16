@@ -72,7 +72,7 @@ async function identifyRequester(req) {
 // Never reveals any other user's data.
 async function buildUserContext(requester) {
   if (requester.role !== "user") {
-    return "The current visitor is NOT logged in (anonymous). Encourage them to register or log in if their question requires an account — they can still ask general questions about how the app works.";
+    return "The current visitor is NOT logged in (anonymous). Encourage them to sign up (the button is labeled \"Sign Up\") or log in if their question requires an account — they can still ask general questions about how the app works.";
   }
 
   try {

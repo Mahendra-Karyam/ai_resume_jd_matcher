@@ -12,7 +12,7 @@ ResumeMatcher lets a user upload their resume and paste a job description, then 
 3. Compare the two and produce: a match score (0-100%), a list of matched skills, a list of missing skills, and tailored suggestions to improve the resume for that specific job
 
 === HOW TO USE THE APP, STEP BY STEP ===
-1. Register for an account (name, email, password) or log in if you already have one
+1. Click "Sign Up" to create an account (name, email, password) or "Log In" if you already have one
 2. On the Dashboard page, drag & drop (or click to browse) a resume file — PDF or DOCX only, max 5MB
 3. The AI automatically parses the resume in the background after upload
 4. In the "Add Job Description" section, paste the full job posting text. Job title and company are optional fields
