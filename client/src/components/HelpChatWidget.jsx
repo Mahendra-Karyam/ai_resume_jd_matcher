@@ -17,14 +17,16 @@ const STARTER_QUESTIONS = [
   "Where can I see my past matches?",
 ];
 
-// Gemini replies in light Markdown (mainly **bold**, *italic*, and "* "
-// bullet lines). Rather than pulling in a full markdown library or using
-// dangerouslySetInnerHTML (risky with AI text), this processes the reply
-// line by line: a line starting with "* " becomes a real bullet point
-// (dot + text, not a literal asterisk); within any line, **bold** becomes
-// <strong> and single *italic* becomes <em> (checked in that order, since
-// ** must be matched before a lone * is considered). Numbered lines
-// ("1. ", "2. ") and plain lines are left as-is, just with bold/italic applied.
+// Gemini replies in light Markdown (mainly **bold**, *italic*, "* " bullet
+// lines, and "### " headings). Rather than pulling in a full markdown
+// library or using dangerouslySetInnerHTML (risky with AI text), this
+// processes the reply line by line: a line starting with "### " (1-6 #'s)
+// becomes a bold heading with the #'s stripped, a line starting with "* "
+// becomes a real bullet point (dot + text, not a literal asterisk); within
+// any line, **bold** becomes <strong> and single *italic* becomes <em>
+// (checked in that order, since ** must be matched before a lone * is
+// considered). Numbered lines ("1. ", "2. ") and plain lines are left
+// as-is, just with bold/italic applied.
 const renderInline = (line, lineKey) => {
   const parts = line.split(/(\*\*[^*]+\*\*|\*[^*]+\*)/g);
   return parts.map((part, i) => {
@@ -41,6 +43,14 @@ const renderInline = (line, lineKey) => {
 const renderFormattedText = (text) => {
   const lines = text.split("\n");
   return lines.map((line, i) => {
+    const headingMatch = line.match(/^\s{0,3}#{1,6}\s+(.*)$/);
+    if (headingMatch) {
+      return (
+        <div key={i} className="font-semibold mt-1.5 first:mt-0">
+          {renderInline(headingMatch[1], i)}
+        </div>
+      );
+    }
     const bulletMatch = line.match(/^\s*\*\s+(.*)$/);
     if (bulletMatch) {
       return (
